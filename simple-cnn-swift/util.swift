@@ -9,16 +9,16 @@
 import Foundation
 
 
-func loadJSONFile(filename: String) -> NSDictionary? {
+func loadJSONFile(_ filename: String) -> NSDictionary? {
     print(" ==> loadJSONFile(filename=\(filename)")
     
     do {
         //let bundle = NSBundle.mainBundle()
         //let path = bundle.pathForResource(filename, ofType: "json")!
         let path = filename
-        let jsonData = NSData(contentsOfFile: path)
+        let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path))
         print(" <== loadJSONFile")    
-        return try NSJSONSerialization.JSONObjectWithData(jsonData!, options: .AllowFragments) as? NSDictionary
+        return try JSONSerialization.jsonObject(with: jsonData!, options: .allowFragments) as? NSDictionary
     } catch _ {
         return nil
     }
@@ -26,7 +26,7 @@ func loadJSONFile(filename: String) -> NSDictionary? {
 }
 
 
-func compute_output_shape(height: Int, width: Int, pad_h: Int, pad_w: Int, 
+func compute_output_shape(_ height: Int, width: Int, pad_h: Int, pad_w: Int, 
     kernel_h: Int, kernel_w: Int, stride_h: Int, stride_w: Int) -> (Int, Int)
 {
     let height_out = Int(ceil( (Float(height) + 2 * Float(pad_h) - Float(kernel_h)) / Float(stride_h) + 1.0 ))
@@ -34,18 +34,18 @@ func compute_output_shape(height: Int, width: Int, pad_h: Int, pad_w: Int,
     return (width_out, height_out)
 }
 
-func copyArrayIF(arr : [Int]) -> [Float]
+func copyArrayIF(_ arr : [Int]) -> [Float]
 {
-    var out = [Float](count: arr.count, repeatedValue: 0.0)
+    var out = [Float](repeating: 0.0, count: arr.count)
     for i in 0..<out.count {
         out[i] = Float(arr[i])
     }
     return out
 }
 
-func copyArrayFF(arr : [Float]) -> [Float]
+func copyArrayFF(_ arr : [Float]) -> [Float]
 {
-    var out = [Float](count: arr.count, repeatedValue: 0.0)
+    var out = [Float](repeating: 0.0, count: arr.count)
     for i in 0..<out.count {
         out[i] = arr[i]
     }
@@ -53,9 +53,9 @@ func copyArrayFF(arr : [Float]) -> [Float]
 }
 
 //平均画像を適用
-func applyMean(input: [Float], mean: [Float]) -> [Float]
+func applyMean(_ input: [Float], mean: [Float]) -> [Float]
 {
-    var output: [Float] = [Float](count: input.count, repeatedValue: 0.0)
+    var output: [Float] = [Float](repeating: 0.0, count: input.count)
     for i in 0..<input.count {
         output[i] = input[i] - mean[i]
     }
@@ -110,7 +110,7 @@ class BatchNorm_params {
 }
 
 
-func load_net(filename: String) -> (Array<(String, String)>, Dictionary<String, AnyObject>, [Float]?){
+func load_net(_ filename: String) -> (Array<(String, String)>, Dictionary<String, AnyObject>, [Float]?){
     
     let layers_json = loadJSONFile(filename)
     let layers = layers_json!["layer"]
@@ -123,7 +123,7 @@ func load_net(filename: String) -> (Array<(String, String)>, Dictionary<String, 
     var net_params : Dictionary<String, AnyObject> = Dictionary()
     var net : Array<(String, String)> = Array()
     
-    for i in 0..<layers!.count {
+    for i in 0..<(layers! as AnyObject).count {
         let layer = layers![i] as! NSDictionary
         let layer_name = layer["name"]! as! String
         let layer_type = layer["type"]! as! String

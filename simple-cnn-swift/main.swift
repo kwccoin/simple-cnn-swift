@@ -7,7 +7,7 @@ import Foundation
 import Cocoa
 
 // for osx
-func im2array(image: NSImage, scale: Float) -> [Float]
+func im2array(_ image: NSImage, scale: Float) -> [Float]
 {
     var channel_red : Array<Float> = []
     var channel_blue : Array<Float> = []
@@ -15,15 +15,15 @@ func im2array(image: NSImage, scale: Float) -> [Float]
     
     let size = image.size    
     
-    let bmap : NSBitmapImageRep! = NSBitmapImageRep(data: image.TIFFRepresentation!)
+    let bmap : NSBitmapImageRep! = NSBitmapImageRep(data: image.tiffRepresentation!)
     bmap.size = size
     let width = Int(size.width) 
     
     for h in 0..<Int(size.height) {
         for w in 0..<Int(size.width) {
-            channel_green.append(Float(bmap.colorAtX(width - w - 1, y: h)!.greenComponent) * scale)
-            channel_red.append(Float(bmap.colorAtX(width - w - 1, y: h)!.redComponent) * scale)
-            channel_blue.append(Float(bmap.colorAtX(width - w - 1, y: h)!.blueComponent) * scale)
+            channel_green.append(Float(bmap.colorAt(x: width - w - 1, y: h)!.greenComponent) * scale)
+            channel_red.append(Float(bmap.colorAt(x: width - w - 1, y: h)!.redComponent) * scale)
+            channel_blue.append(Float(bmap.colorAt(x: width - w - 1, y: h)!.blueComponent) * scale)
         }
     }
     
@@ -53,10 +53,10 @@ if mean != nil {
 }
 
 
-let st = NSDate()
+let st = Date()
 let softmax_val : [Float]! = forward(input_data, image_shape: input_shape, net: net, net_params: net_params)
-let end = NSDate().timeIntervalSinceDate(st)
-print("pred : \(label[softmax_val!.indexOf(softmax_val.maxElement()!)!])")
+let end = Date().timeIntervalSince(st)
+print("pred : \(label[softmax_val!.index(of: softmax_val.max()!)!])")
 print("forward time : \(end)")
 
 

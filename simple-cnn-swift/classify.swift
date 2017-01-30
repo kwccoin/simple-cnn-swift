@@ -10,7 +10,7 @@ import Foundation
 import Cocoa
 import Metal
 
-func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>, net_params : Dictionary<String, AnyObject>) -> [Float]?
+func forward(_ image : [Float], image_shape : [Int], net : Array<(String, String)>, net_params : Dictionary<String, AnyObject>) -> [Float]?
 {
     // [N, C, H, W]
     var input_data : [Float]!
@@ -43,7 +43,7 @@ func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>
             let stride = params.stride
             let num_output = params.num_output
             
-            let channels_col = Int(input_shape[1]) * kernel_size * kernel_size
+            let channels_col = Int(input_shape[1]) * kernel_size! * kernel_size
             let height_col = Int(ceil( (Float(input_shape[2]) + 2 * Float(pad) - Float(kernel_size)) / Float(stride) + 1.0 ))
             let width_col = Int(ceil( (Float(input_shape[3]) + 2 * Float(pad) - Float(kernel_size)) / Float(stride) + 1.0))
             
@@ -55,7 +55,7 @@ func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>
             //let im2ColCount = channels_col * height_col * width_col
             var output_dimension : [Int] = [1, num_output, height_col, width_col]
             let outputCount = output_dimension[1] * output_dimension[2] * output_dimension[3]          
-            var output = [Float](count: outputCount, repeatedValue: 0.0)
+            var output = [Float](repeating: 0.0, count: outputCount)
  
             // compute
             output = convolution.forward_cpu(input_data, weights: weights, bias: bias, col_dimension: col_dimension, output_dimension: output_dimension)
@@ -79,7 +79,7 @@ func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>
             let width_col = Int(ceil( (Float(input_shape[3]) + 2 * Float(pad) - Float(kernel_size)) / Float(stride) + 1.0))
             
             let output_shape : [Int] = [1, input_shape[1], height_col, width_col]
-            var output : [Float] = [Float](count: input_shape[1] * height_col * width_col, repeatedValue: 0.0)
+            var output : [Float] = [Float](repeating: 0.0, count: input_shape[1] * height_col * width_col)
             
             if pool == 0 {
                 output = max_pool(input_data, input_shape: input_shape, kernel_size: kernel_size, stride: stride, pad: pad)
@@ -113,8 +113,8 @@ func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>
             let bias : [Float] = params.bias
             let num_output = params.num_output
             
-            var output : [Float] = [Float](count: num_output, repeatedValue: 0.0)
-            let output_shape : [Int]! = [1, num_output, 1, 1]
+            var output : [Float] = [Float](repeating: 0.0, count: num_output!)
+            let output_shape : [Int]! = [1, num_output!, 1, 1]
             
             output = inner_product(input_data, weights: weights, weights_shape: weights_shape, bias: bias)
 
@@ -146,12 +146,12 @@ func forward(image : [Float], image_shape : [Int], net : Array<(String, String)>
             print(input_data)
             // Soft-max function
             let t = input_data.map { exp($0) }
-            let total = t.reduce(0, combine: +)
+            let total = t.reduce(0, +)
             let result = t.map { $0 / total }
             print(result)
-            let maxVal : Float! = result.maxElement()
+            let maxVal : Float! = result.max()
             print("MaxVal : \(maxVal)")
-            print("index : \(result.indexOf(maxVal)!)")
+            print("index : \(result.index(of: maxVal)!)")
             return result
         }
         
